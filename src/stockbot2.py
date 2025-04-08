@@ -23,6 +23,8 @@ stockschannelid = int(stockschannelid)
 
 description = "A bot that people can annoy about stocks."
 
+indexes = {"^DJI": "DJI","^GSPC": "S&P 500","^IXIC":"NASDAQ","^RUT":"R 2000"}
+
 intents = discord.Intents.default()
 intents.message_content = True
 
@@ -100,8 +102,7 @@ async def index(ctx):
             message = random.choice(sleepMessages)
             await ctx.send(message)
         else:
-            
-            tickers = yfinance.Tickers("^DJI ^GSPC ^IXIC ^RUT")
+            tickers = yfinance.Tickers(" ".join(indexes.keys()))
 
             header = ["Name", "Price", "% Change"]
             tabledata = []
@@ -109,7 +110,7 @@ async def index(ctx):
 
             for symbol, ticker in tickers.tickers.items():
                 logging.debug(ticker.info)
-                tabledata.append([ticker.info['shortName'],f"${round(ticker.info['regularMarketPrice'],2)}",f"{round(ticker.info['regularMarketChangePercent'], 2)}%"])
+                tabledata.append([indexes[symbol],f"${round(ticker.info['regularMarketPrice'],2)}",f"{round(ticker.info['regularMarketChangePercent'], 2)}%"])
                 emojimessage += GetEmoji(ticker.info['regularMarketChangePercent'])
 
             output = table2ascii(
