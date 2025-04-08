@@ -77,6 +77,31 @@ def GetEmoji(value:float):
         emojistring = create_random_tone_emoji(random.choice(shrugemojioptions))
     return emojistring
 
+# method to check if it's the weekend
+def IsWeekend():
+    now = datetime.now()
+    logging.info("It's currently {}. ISO weekday is {}.".format(now, now.isoweekday()))
+
+    # Check day of week
+    # If Sat or sun, tell people to go away
+    if now.isoweekday() in {6, 7}:
+        return True
+    else:
+        return False
+
+def DoesSymbolExist(symbol: str) -> bool:
+    """
+    Checks if a symbol is available via the Yahoo Finance API.
+    """
+
+    ticker = yfinance.Ticker(symbol)
+    try:
+        info = ticker.info
+        return True
+    except:
+        print(f"Cannot get info of {symbol}, it probably does not exist")
+    return False
+
 # Runs when bot starts
 @bot.event
 async def on_ready():
@@ -88,17 +113,14 @@ async def on_ready():
 # /index command
 @bot.command()
 async def index(ctx):
-    logging.info("Heard /tehindex command in {}".format(ctx.message.channel))
+    logging.info("Heard /index command in {}".format(ctx.message.channel))
 
     # Check if we got a message from the monitored channel
     if ctx.message.channel == bot.get_channel(stockschannelid):
         logging.info("Message is in our configured listening channel")
-        now = datetime.now()
-        logging.info("It's currently {}. ISO weekday is {}.".format(now, now.isoweekday()))
-
         # Check day of week
         # If Sat or sun, tell people to go away
-        if now.isoweekday() in {6, 7}:
+        if IsWeekend():
             logging.info("It's the weekend. Sent sleeping message.")
             message = random.choice(sleepMessages)
             await ctx.send(message)
@@ -111,7 +133,7 @@ async def index(ctx):
             emojimessage = ""
             marketstate = ""
 
-            # Loop thoruhg all our monitored tickers and pull data
+            # Loop through all our monitored tickers and pull data
             for symbol, ticker in tickers.tickers.items():
                 logging.debug(ticker.info)
                 tabledata.append([indexes[symbol],f"${'{:.2f}'.format(round(ticker.info['regularMarketPrice'],2))}",f"{'{:.2f}'.format(round(ticker.info['regularMarketChangePercent'], 2))}%"])
@@ -136,6 +158,33 @@ async def index(ctx):
             # send messages
             await ctx.send(f"Market state is {marketstate}", embed=embedVar)
             await ctx.send(emojimessage)
-    
+
+# /ticker command
+@bot.command()
+async def ticker(ctx, symbol: str):
+    logging.info(f"Heard /ticker command in {ctx.message.channel} for ticker {symbol}")
+
+    # Check if we got a message from the monitored channel
+    if ctx.message.channel == bot.get_channel(stockschannelid):
+        logging.info("Message is in our configured listening channel")
+        # Check day of week
+        # If Sat or sun, tell people to go away
+        if IsWeekend():
+            logging.info("It's the weekend. Sent sleeping message.")
+            message = random.choice(sleepMessages)
+            await ctx.send(message)
+        else:
+            if DoesSymbolExist(symbol):
+                ticker = yfinance.Ticker(symbol)
+                logging.debug(ticker.info)
+                embedVar = discord.Embed(title=ticker.info['longName'], color=0x00ff00)
+                embedVar.add_field(name="Current Quote", value=f"${'{:.2f}'.format(round(ticker.info['regularMarketPrice'],2))}", inline=False)
+                embedVar.add_field(name="Open Price", value=f"${'{:.2f}'.format(round(ticker.info['regularMarketOpen'],2))}", inline=False)
+                embedVar.add_field(name="Day Change", value=f"${'{:.2f}'.format(round(ticker.info['regularMarketChangePercent'],2))}", inline=False)
+                await ctx.send(f"Market state is {ticker.info['marketState']}", embed=embedVar)
+            else:
+                await ctx.send(f"I can't find symbol: {symbol}")
+            
+
 # Run the bot
 bot.run(token)
