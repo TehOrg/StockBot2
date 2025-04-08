@@ -9,6 +9,10 @@ import sys
 from datetime import datetime
 from table2ascii import table2ascii, Alignment
 
+logging.basicConfig(
+    level=os.environ.get('LOG_LEVEL', 'INFO').upper()
+)
+
 token = os.getenv("DISCORD_TOKEN")
 if not token:
     logging.error("DISCORD_TOKEN env variable missing")
@@ -107,11 +111,13 @@ async def index(ctx):
             header = ["Name", "Price", "% Change"]
             tabledata = []
             emojimessage = ""
+            marketstate = ""
 
             for symbol, ticker in tickers.tickers.items():
                 logging.debug(ticker.info)
                 tabledata.append([indexes[symbol],f"${'{:.2f}'.format(round(ticker.info['regularMarketPrice'],2))}",f"{'{:.2f}'.format(round(ticker.info['regularMarketChangePercent'], 2))}%"])
                 emojimessage += GetEmoji(ticker.info['regularMarketChangePercent'])
+                marketstate = ticker.info["marketState"]
 
             output = table2ascii(
                 header=header,
@@ -122,7 +128,7 @@ async def index(ctx):
             messagetext = f"```\n{output}\n```"
             embedVar = discord.Embed(title="US Indexes", description=messagetext)
             # await ctx.send(f"```\n{output}\n```")
-            await ctx.send(embed=embedVar)
+            await ctx.send(f"Market state is {marketstate}", embed=embedVar)
             await ctx.send(emojimessage)
     
 
