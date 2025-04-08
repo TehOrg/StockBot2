@@ -15,7 +15,7 @@ if not token:
     sys.exit()
 
 stockschannelid = os.getenv("STOCKS_CHANNEL_ID")
-if not token:
+if not stockschannelid:
     logging.error("STOCKS_CHANNEL_ID env variable missing")
     sys.exit()
 
