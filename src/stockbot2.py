@@ -180,7 +180,7 @@ async def ticker(ctx, symbol: str):
                 embedVar = discord.Embed(title=ticker.info['longName'], color=0x00ff00)
                 embedVar.add_field(name="Current Quote", value=f"${'{:.2f}'.format(round(ticker.info['regularMarketPrice'],2))}", inline=False)
                 embedVar.add_field(name="Open Price", value=f"${'{:.2f}'.format(round(ticker.info['regularMarketOpen'],2))}", inline=False)
-                embedVar.add_field(name="Day Change", value=f"${'{:.2f}'.format(round(ticker.info['regularMarketChangePercent'],2))}", inline=False)
+                embedVar.add_field(name="Day Change", value=f"{'{:.2f}'.format(round(ticker.info['regularMarketChangePercent'],2))}%", inline=False)
                 await ctx.send(f"Market state is {ticker.info['marketState']}", embed=embedVar)
             else:
                 await ctx.send(f"I can't find symbol: {symbol}")
