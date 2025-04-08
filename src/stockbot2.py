@@ -26,7 +26,7 @@ description = "A bot that people can annoy about stocks."
 intents = discord.Intents.default()
 intents.message_content = True
 
-bot = commands.Bot(command_prefix='/', description=description, intents=intents)
+bot = commands.Bot(command_prefix='!', description=description, intents=intents)
 
 sleepMessages = [
     "Fuck off! I'm sleeping.",
