@@ -7,7 +7,7 @@ import os
 import sys
 
 from datetime import datetime
-from table2ascii import table2ascii, PresetStyle
+from table2ascii import table2ascii, Alignment
 
 token = os.getenv("DISCORD_TOKEN")
 if not token:
@@ -116,7 +116,8 @@ async def index(ctx):
             output = table2ascii(
                 header=header,
                 body=tabledata,
-                first_col_heading=True
+                first_col_heading=True,
+                alignments=[Alignment.LEFT, Alignment.RIGHT, Alignment.RIGHT]
             )
             messagetext = f"```\n{output}\n```"
             embedVar = discord.Embed(title="US Indexes", description=messagetext)
