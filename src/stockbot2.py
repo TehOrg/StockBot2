@@ -19,6 +19,8 @@ if not stockschannelid:
     logging.error("STOCKS_CHANNEL_ID env variable missing")
     sys.exit()
 
+stockschannelid = int(stockschannelid)
+
 description = "A bot that people can annoy about stocks."
 
 intents = discord.Intents.default()
@@ -90,7 +92,7 @@ async def on_ready():
     print('------')
     print(f"Using {stockschannelid} channel id")
     logging.info("Using {} for channel.".format(bot.get_channel(stockschannelid)))
-    message_channel = bot.get_channel(int(stockschannelid))
+    message_channel = bot.get_channel(stockschannelid)
     await message_channel.send("I'm (sorta) back, bitches!")
 
 @bot.command()
