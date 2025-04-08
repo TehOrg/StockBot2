@@ -40,27 +40,22 @@ sleepMessages = [
 ]
 
 # Generates stonks down and stonks up emojis based on index data
-def generate_emoji(dataset):
+def GetEmoji(value):
     fullemojistring = ""
-    for line in dataset:
-        if isinstance(line, pd.core.frame.DataFrame):
-            data = (line.iloc[0]["% Change"]).replace("%", "")
-        else:
-            data = line["% Change"]
-        if float(data) >= 3:
-            emojistring = " :exploding_head: "
-        elif float(data) <= -3:
-            emojistring = " <:fine:682657326070759449> "
-        elif float(data) >= .5:
-            emojistring = " <:stonks_up:690604708020224071> "
-        elif float(data) <= -.5:
-            emojistring = " <:stonks_down:690604763066138655> "
-        else:
-            shrugemojioptions = ['person_shrugging',
-                           'man_shrugging',
-                           'woman_shrugging']
-            emojistring = create_random_tone_emoji(random.choice(shrugemojioptions))
-        fullemojistring = fullemojistring + emojistring
+    if float(value) >= 3:
+        emojistring = " :exploding_head: "
+    elif float(value) <= -3:
+        emojistring = " <:fine:682657326070759449> "
+    elif float(value) >= .5:
+        emojistring = " <:stonks_up:690604708020224071> "
+    elif float(value) <= -.5:
+        emojistring = " <:stonks_down:690604763066138655> "
+    else:
+        shrugemojioptions = ['person_shrugging',
+                        'man_shrugging',
+                        'woman_shrugging']
+        emojistring = create_random_tone_emoji(random.choice(shrugemojioptions))
+    fullemojistring = fullemojistring + emojistring
     return fullemojistring
 
 # Create an emoji with a random tone
@@ -119,7 +114,7 @@ async def index(ctx):
             for symbol, ticker in tickers.tickers.items():
                 print(ticker.info)
                 print(f"{ticker.info['shortName']}:{ticker.info['regularMarketPrice']}:{ticker.info['regularMarketChangePercent']}")
-                tabledata.append([ticker.info['shortName'],ticker.info['regularMarketPrice'],round(ticker.info['regularMarketChangePercent'], 2)])
+                tabledata.append([ticker.info['shortName'],f"${round(ticker.info['regularMarketPrice'],2)}",f"{round(ticker.info['regularMarketChangePercent'], 2)}%"])
                 emojimessage += GetEmoji(ticker.info['regularMarketChangePercent'])
 
             output = table2ascii(
