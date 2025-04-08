@@ -1,0 +1,3 @@
+
+
+podman run stockbot2 -
