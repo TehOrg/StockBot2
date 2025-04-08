@@ -80,19 +80,16 @@ def GetEmoji(value:float):
         emojistring = create_random_tone_emoji(random.choice(shrugemojioptions))
     return emojistring
 
-
 @bot.event
 async def on_ready():
-    print(f'Logged in as {bot.user} (ID: {bot.user.id})')
-    print('------')
-    print(f"Using {stockschannelid} channel id")
+    logging.info(f'Logged in as {bot.user} (ID: {bot.user.id})')
     logging.info("Using {} for channel.".format(bot.get_channel(stockschannelid)))
     message_channel = bot.get_channel(stockschannelid)
     await message_channel.send("I'm (sorta) back, bitches!")
 
 @bot.command()
 async def index(ctx):
-    logging.info("Heard !tehindex command in {}".format(ctx.message.channel))
+    logging.info("Heard /tehindex command in {}".format(ctx.message.channel))
     if ctx.message.channel == bot.get_channel(stockschannelid):
         logging.info("Message is in our configured listening channel")
         now = datetime.now()
@@ -105,15 +102,13 @@ async def index(ctx):
         else:
             
             tickers = yfinance.Tickers("^DJI ^GSPC ^IXIC ^RUT")
-            print(tickers.tickers['^DJI'].info['regularMarketPrice'])
 
             header = ["Name", "Price", "% Change"]
             tabledata = []
             emojimessage = ""
 
             for symbol, ticker in tickers.tickers.items():
-                print(ticker.info)
-                print(f"{ticker.info['shortName']}:{ticker.info['regularMarketPrice']}:{ticker.info['regularMarketChangePercent']}")
+                logging.debug(ticker.info)
                 tabledata.append([ticker.info['shortName'],f"${round(ticker.info['regularMarketPrice'],2)}",f"{round(ticker.info['regularMarketChangePercent'], 2)}%"])
                 emojimessage += GetEmoji(ticker.info['regularMarketChangePercent'])
 
