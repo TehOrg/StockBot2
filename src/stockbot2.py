@@ -19,10 +19,6 @@ if not stockschannelid:
     logging.error("STOCKS_CHANNEL_ID env variable missing")
     sys.exit()
 
-test = os.getenv("TEST")
-if test:
-    testmode = True
-
 description = "A bot that people can annoy about stocks."
 
 intents = discord.Intents.default()
@@ -92,8 +88,9 @@ def GetEmoji(value:float):
 async def on_ready():
     print(f'Logged in as {bot.user} (ID: {bot.user.id})')
     print('------')
+    print(f"Using {stockschannelid} channel id")
     logging.info("Using {} for channel.".format(bot.get_channel(stockschannelid)))
-    message_channel = bot.get_channel(stockschannelid)
+    message_channel = bot.get_channel(int(stockschannelid))
     await message_channel.send("I'm (sorta) back, bitches!")
 
 @bot.command()
