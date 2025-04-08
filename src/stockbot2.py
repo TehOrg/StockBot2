@@ -110,7 +110,7 @@ async def index(ctx):
 
             for symbol, ticker in tickers.tickers.items():
                 logging.debug(ticker.info)
-                tabledata.append([indexes[symbol],f"${round(ticker.info['regularMarketPrice'],2)}",f"{round(ticker.info['regularMarketChangePercent'], 2)}%"])
+                tabledata.append([indexes[symbol],f"${'{:.2f}'.format(round(ticker.info['regularMarketPrice'],2))}",f"{'{:.2f}'.format(round(ticker.info['regularMarketChangePercent'], 2))}%"])
                 emojimessage += GetEmoji(ticker.info['regularMarketChangePercent'])
 
             output = table2ascii(
