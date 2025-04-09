@@ -107,8 +107,8 @@ def DoesSymbolExist(symbol: str) -> bool:
 async def on_ready():
     logging.info(f'Logged in as {bot.user} (ID: {bot.user.id})')
     logging.info("Using {} for channel.".format(bot.get_channel(stockschannelid)))
-    message_channel = bot.get_channel(stockschannelid)
-    await message_channel.send("I'm (sorta) back, bitches!")
+    #message_channel = bot.get_channel(stockschannelid)
+    #await message_channel.send("I'm (sorta) back, bitches!")
 
 # /index command
 @bot.command()
