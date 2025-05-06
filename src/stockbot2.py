@@ -8,6 +8,7 @@ import sys
 
 from datetime import datetime
 from table2ascii import table2ascii, Alignment
+import yfinance.exceptions
 
 # Get log level from env variable, default to INFO
 logging.basicConfig(
@@ -125,39 +126,43 @@ async def index(ctx):
             message = random.choice(sleepMessages)
             await ctx.send(message)
         else:
-            # Create spaced list of tickers, it's what yfinanace expects for multiple tickers
-            tickers = yfinance.Tickers(" ".join(indexes.keys()))
+            try:
+                # Create spaced list of tickers, it's what yfinanace expects for multiple tickers
+                tickers = yfinance.Tickers(" ".join(indexes.keys()))
 
-            header = ["Name", "Price", "% Change"]
-            tabledata = []
-            emojimessage = ""
-            marketstate = ""
+                header = ["Name", "Price", "% Change"]
+                tabledata = []
+                emojimessage = ""
+                marketstate = ""
 
-            # Loop through all our monitored tickers and pull data
-            for symbol, ticker in tickers.tickers.items():
-                logging.debug(ticker.info)
-                tabledata.append([indexes[symbol],f"${'{:.2f}'.format(round(ticker.info['regularMarketPrice'],2))}",f"{'{:.2f}'.format(round(ticker.info['regularMarketChangePercent'], 2))}%"])
-                emojimessage += GetEmoji(ticker.info['regularMarketChangePercent'])
-                marketstate = ticker.info["marketState"]
+                # Loop through all our monitored tickers and pull data
+                for symbol, ticker in tickers.tickers.items():
+                    logging.debug(ticker.info)
+                    tabledata.append([indexes[symbol],f"${'{:.2f}'.format(round(ticker.info['regularMarketPrice'],2))}",f"{'{:.2f}'.format(round(ticker.info['regularMarketChangePercent'], 2))}%"])
+                    emojimessage += GetEmoji(ticker.info['regularMarketChangePercent'])
+                    marketstate = ticker.info["marketState"]
 
-            # Covert table to ascii
-            output = table2ascii(
-                header=header,
-                body=tabledata,
-                first_col_heading=True,
-                alignments=[Alignment.LEFT, Alignment.RIGHT, Alignment.RIGHT]
-            )
+                # Covert table to ascii
+                output = table2ascii(
+                    header=header,
+                    body=tabledata,
+                    first_col_heading=True,
+                    alignments=[Alignment.LEFT, Alignment.RIGHT, Alignment.RIGHT]
+                )
 
-            # Make sure we output in monospace
-            messagetext = f"```\n{output}\n```"
+                # Make sure we output in monospace
+                messagetext = f"```\n{output}\n```"
 
-            # Create message embed
-            embedVar = discord.Embed(title="US Indexes", description=messagetext)
-            # await ctx.send(f"```\n{output}\n```")
+                # Create message embed
+                embedVar = discord.Embed(title="US Indexes", description=messagetext)
+                # await ctx.send(f"```\n{output}\n```")
 
-            # send messages
-            await ctx.send(f"Market state is {marketstate}", embed=embedVar)
-            await ctx.send(emojimessage)
+                # send messages
+                await ctx.send(f"Market state is {marketstate}", embed=embedVar)
+                await ctx.send(emojimessage)
+            except yfinance.exceptions.YFRateLimitError:
+                logging.warning("Rate limited")
+                await ctx.send("YFinance has rated limited me. Try again later.")
 
 # /ticker command
 @bot.command()
@@ -174,17 +179,21 @@ async def ticker(ctx, symbol: str):
             message = random.choice(sleepMessages)
             await ctx.send(message)
         else:
-            if DoesSymbolExist(symbol):
-                ticker = yfinance.Ticker(symbol)
-                logging.debug(ticker.info)
-                embedVar = discord.Embed(title=ticker.info['longName'], color=0x00ff00)
-                embedVar.add_field(name="Current Quote", value=f"${'{:.2f}'.format(round(ticker.info['regularMarketPrice'],2))}", inline=False)
-                embedVar.add_field(name="Previous Close", value=f"${'{:.2f}'.format(round(ticker.info['regularMarketPreviousClose'],2))}", inline=False)
-                embedVar.add_field(name="Open Price", value=f"${'{:.2f}'.format(round(ticker.info['regularMarketOpen'],2))}", inline=False)
-                embedVar.add_field(name="Day Change", value=f"{'{:.2f}'.format(round(ticker.info['regularMarketChangePercent'],2))}%", inline=False)
-                await ctx.send(f"Market state is {ticker.info['marketState']}", embed=embedVar)
-            else:
-                await ctx.send(f"I can't find symbol: {symbol}")
+            try:
+                if DoesSymbolExist(symbol):
+                    ticker = yfinance.Ticker(symbol)
+                    logging.debug(ticker.info)
+                    embedVar = discord.Embed(title=ticker.info['longName'], color=0x00ff00)
+                    embedVar.add_field(name="Current Quote", value=f"${'{:.2f}'.format(round(ticker.info['regularMarketPrice'],2))}", inline=False)
+                    embedVar.add_field(name="Previous Close", value=f"${'{:.2f}'.format(round(ticker.info['regularMarketPreviousClose'],2))}", inline=False)
+                    embedVar.add_field(name="Open Price", value=f"${'{:.2f}'.format(round(ticker.info['regularMarketOpen'],2))}", inline=False)
+                    embedVar.add_field(name="Day Change", value=f"{'{:.2f}'.format(round(ticker.info['regularMarketChangePercent'],2))}%", inline=False)
+                    await ctx.send(f"Market state is {ticker.info['marketState']}", embed=embedVar)
+                else:
+                    await ctx.send(f"I can't find symbol: {symbol}")
+            except yfinance.exceptions.YFRateLimitError:
+                logging.warning("Rate limited")
+                await ctx.send("YFinance has rated limited me. Try again later.")
             
 
 # Run the bot
